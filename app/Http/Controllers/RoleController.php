@@ -12,24 +12,9 @@ class RoleController extends Controller
 {
    
 // Fonction pour afficher la liste des rôles
-    public function index(request $request)
-    {
-
+    public function index(){
         $roles = Role::all();
-        if ( $request->user()->tokenCan('Admin')) {
-           dd('la liste des rôles');
-        }
-        return response()->json([
-            'message' => 'La liste des rôles',
-            'roles' => $roles
-        ]);
-        if (count($roles) == 0) {
-            return response()->json([
-                'message' => 'La liste des rôles est vide',
-            ]);
-        }
-
-        
+        return response()->json($roles);
     }
 
    
@@ -47,18 +32,15 @@ class RoleController extends Controller
         ]);
 
         if ($validator->fails()) {
-            
             return response()->json($validator->errors(), 400);
         }
 
-        Role::create([
+        $createdRole = Role::create([
             'nom' => $request->nom,
             'description' => $request->description,
         ]);
 
-        return response()->json([
-            'message' => 'Role ajouter avec succes ',
-        ]);;
+        return response()->json($createdRole);
     }
 
     public function show(Role $role)
@@ -81,7 +63,6 @@ class RoleController extends Controller
         ]);
 
         if ($validator->fails()) {
-            
             return response()->json($validator->errors(), 400);
         }
     
@@ -90,24 +71,19 @@ class RoleController extends Controller
             'description' => $request->description,
         ]);
     
-        return response()->json([
-            'message' => 'Rôle modifié avec succès',
-            'role' => $role,
-        ]);
+        return response()->json($role);
     }
     
     
     // Fonction pour supprimer un rôle
     public function destroy(Role $role)
     {
-        $role->delete();
-
-        if (!$role) {
-            return response()->json([
-                'message' => 'Rôle non supprimé',
-            ]);
+        $isDeleted = $role->delete();
+        
+        if(!$isDeleted){
+            return response()->json(["message" => "Echec de suppression"], 400);
         }
-
+        
         return response()->json([
             'message' => 'Rôle supprimé avec succès',
         ]);

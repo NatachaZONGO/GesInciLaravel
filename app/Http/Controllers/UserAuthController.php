@@ -64,7 +64,7 @@ class UserAuthController extends Controller
 
     // fonction de connexion logout
     public function logout(){
-        auth()->user()->tokens()->delete();
+        //auth()->user()->tokens()->delete();
         return response()->json([
             'message'=>'logged out'    
         ]);
