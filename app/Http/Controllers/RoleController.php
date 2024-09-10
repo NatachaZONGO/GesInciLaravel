@@ -14,15 +14,13 @@ class RoleController extends Controller
 // Fonction pour afficher la liste des rôles
     public function index(request $request)
     {
+       // dd ($request->user());
 
         $roles = Role::all();
-        if ( $request->user()->tokenCan('Admin')) {
+        return response()->json($roles);
+        if ( $request->user()) {
            dd('la liste des rôles');
         }
-        return response()->json([
-            'message' => 'La liste des rôles',
-            'roles' => $roles
-        ]);
         if (count($roles) == 0) {
             return response()->json([
                 'message' => 'La liste des rôles est vide',
@@ -51,14 +49,12 @@ class RoleController extends Controller
             return response()->json($validator->errors(), 400);
         }
 
-        Role::create([
+        $role = Role::create([
             'nom' => $request->nom,
             'description' => $request->description,
         ]);
 
-        return response()->json([
-            'message' => 'Role ajouter avec succes ',
-        ]);;
+        return response()->json($role);
     }
 
     public function show(Role $role)
@@ -76,7 +72,7 @@ class RoleController extends Controller
     public function update(Request $request, Role $role)
     {
         $validator = Validator::make($request->all(), [
-            'nom' => 'required|string|unique:roles|max:255',
+            'nom' => 'required|string|max:255',
             'description' => 'string|max:255',
         ]);
 
@@ -90,10 +86,7 @@ class RoleController extends Controller
             'description' => $request->description,
         ]);
     
-        return response()->json([
-            'message' => 'Rôle modifié avec succès',
-            'role' => $role,
-        ]);
+        return response()->json($role);
     }
     
     
@@ -103,14 +96,10 @@ class RoleController extends Controller
         $role->delete();
 
         if (!$role) {
-            return response()->json([
-                'message' => 'Rôle non supprimé',
-            ]);
+            return response()->json($role);
         }
 
-        return response()->json([
-            'message' => 'Rôle supprimé avec succès',
-        ]);
+        return response()->json($role);
     }
 
 }
