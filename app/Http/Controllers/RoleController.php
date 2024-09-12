@@ -14,7 +14,7 @@ class RoleController extends Controller
 // Fonction pour afficher la liste des rôles
     public function index(request $request)
     {
-       // dd ($request->user());
+       dd (auth()->user());
 
         $roles = Role::all();
         return response()->json($roles);

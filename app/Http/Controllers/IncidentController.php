@@ -16,7 +16,6 @@ class IncidentController extends Controller
         $incidents = Incident::all();
         return response()->json($incidents);
         if ( $request->user()) {
-           dd('la liste des incidents');
         }
         if (count($incidents) == 0) {
             return response()->json([
@@ -39,17 +38,10 @@ class IncidentController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'nom' => 'required|string|unique:incidents|max:255',
+            'nom' => 'required|string|max:255',
             'description' => 'string|max:255',
             'type_incident_id' => 'required|exists:type_incidents,id',
-            'priorite' => 'in:faible,moderate,important',
             'service_id' => 'required|exists:services,id',
-            'soumis_par' => 'required|exists:users,id',
-            'date_soumission' => 'required|date',
-            'prise_en_charge_par' => 'required|exists:users,id',
-            'date_prise_en_charge' => 'required|date',
-            'statut' => 'required|in:en_cours,traite,annule',
-            'commentaires' => 'string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -59,14 +51,14 @@ class IncidentController extends Controller
             'nom' => $request->nom,
             'description' => $request->description,
             'type_incident_id' => $request->type_incident_id,
-            'priorite' => $request->priorite,
+            'priorite' => Incident::$MOYENNE,
             'service_id' => $request->service_id,
-            'soumis_par' => $request->soumis_par,
-            'date_soumission' => $request->date_soumission,
-            'prise_en_charge_par' => $request->prise_en_charge_par,
-            'date_prise_en_charge' => $request->date_prise_en_charge,
-            'statut' => $request->statut,
-            'commentaires' => $request->commentaires,
+            'soumis_par' => auth()->user()->id,
+            'date_soumission' => date('Y-m-d'),
+            'prise_en_charge_par' => null,
+            'date_prise_en_charge' => null,
+            'statut' => Incident::$EN_COURS,
+            'commentaire' => null,
         ]);
         return response()->json($incident);
     }
@@ -96,14 +88,14 @@ class IncidentController extends Controller
             'nom' => 'required|string|max:255',
             'description' => 'string|max:255',
             'type_incident_id' => 'required|exists:type_incidents,id',
-            'priorite' => 'required|in:faible,moderate,important',
+            'priorite' => 'required|in:faible,moyenne,forte',
             'service_id' => 'required|exists:services,id',
-            'soumis_par' => 'required|exists:users,id',
-            'date_soumission' => 'required|date',
-            'prise_en_charge_par' => 'required|exists:users,id',
-            'date_prise_en_charge' => 'required|date',
-            'statut' => 'required|in:en_cours,traite,annule',
-            'commentaires' => 'string|max:255',
+            'soumis_par' => 'exists:users,id',
+            'date_soumission' => 'date',
+            'prise_en_charge_par' => 'exists:users,id',
+            'date_prise_en_charge' => 'date',
+            'statut' => 'in:en_cours,traite,annule',
+            'commentaires' => 'nullable|string',
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
@@ -120,7 +112,7 @@ class IncidentController extends Controller
             'prise_en_charge_par' => $request->prise_en_charge_par,
             'date_prise_en_charge' => $request->date_prise_en_charge,
             'statut' => $request->statut,
-            'commentaires' => $request->commentaire,
+            'commentaires' => $request->commentaires,
         ]);
         return response()->json($incident);
     }
@@ -131,9 +123,6 @@ class IncidentController extends Controller
     public function destroy(Incident $incident)
     {
         $incident->delete();
-        if (!$incident) {
-            return response()->json($incident);
-        }
-        return response()->json($incident);
+        return response()->json(['message' => 'Incident supprimé avec succès']);
     }
 }

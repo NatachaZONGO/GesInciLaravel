@@ -110,4 +110,15 @@ class DepartementController extends Controller
         return response()->json($departement);
     
     }
+
+    //fonction pour afficher la liste des departements et les services liees
+    public function getDepartementsWithServices(){
+        $departements = Departement::with('services')->get();
+        if(count($departements) == 0){
+            return response()->json([
+                'message' => 'La liste des departements est vide'
+            ]);
+        }
+        return response()->json($departements);
+    }
 }

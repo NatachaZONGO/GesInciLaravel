@@ -37,13 +37,14 @@ Route::get('/getUsersWithRoles', [UserAuthController::class, 'getUsersWithRoles'
 
 
 // Route pour les roles
-Route::resource('roles', RoleController::class);
+Route::resource('roles', RoleController::class)->middleware('auth.token');
 //Routes pour les departements
 Route::resource('departements', DepartementController::class);
+Route::get('departements_/getDepartementsWithServices', [DepartementController::class, 'getDepartementsWithServices']);
 //Route pour les services
 Route::resource('services', ServiceController::class);
 //Route pour les types d'incidents
 Route::resource('typeIncidents', TypeIncidentController::class);
 //Route pour les incidents
-Route::resource('incidents', IncidentController::class);
+Route::resource('incidents', IncidentController::class)->middleware('auth.token');
 

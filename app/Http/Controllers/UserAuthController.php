@@ -79,7 +79,7 @@ class UserAuthController extends Controller
                 'message' => 'Invalid Credentials'
             ],401);
         }
-        $token = $user->createToken($user->name.'-AuthToken', $user->abilities() )->plainTextToken;
+        $token = $user->createToken($user->nom.'-AuthToken', $user->abilities() )->plainTextToken;
         return response()->json([
             'access_token' => $token, 
         ]);
