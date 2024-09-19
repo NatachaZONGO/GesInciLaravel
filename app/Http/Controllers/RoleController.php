@@ -14,12 +14,12 @@ class RoleController extends Controller
 // Fonction pour afficher la liste des rôles
     public function index(request $request)
     {
-       dd (auth()->user());
+      // dd (auth()->user());
 
         $roles = Role::all();
         return response()->json($roles);
         if ( $request->user()) {
-           dd('la liste des rôles');
+         //  dd('la liste des rôles');
         }
         if (count($roles) == 0) {
             return response()->json([
@@ -29,6 +29,41 @@ class RoleController extends Controller
 
         
     }
+
+    public function getRoleByName(String $roleName){
+        $role = Role::where('nom', $roleName)->first();
+        if($role == null){
+            return response()->json(["error" => "Mauvais nom"], 400);
+        }
+        //dd($role);
+        return response()->json($role);
+    }
+
+    // fonction pour afficher les utilisateurs d'un role a partir de l'id du role
+    public function getUsersByRole($roleId) 
+    {
+        $role = Role::find($roleId);
+        if (!$role) {
+            return response()->json(['message' => 'Role non trouve'], 404);
+        }
+        $users = $role->users;
+        return response()->json($users);
+    }
+
+
+
+   /* public function getUsersByRole($roleName)
+{
+    $role = Role::where('nom', $roleName)->first(); 
+    if (!$role) {
+        return response()->json(['message' => 'Role non trouve'], 404);
+    }
+    $users = $role->users;
+    return response()->json($users);
+}*/
+
+
+   
 
    
     public function create(Request $request)

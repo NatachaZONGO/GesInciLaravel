@@ -34,10 +34,15 @@ Route::delete('/detachRoles/{user}', [UserAuthController::class, 'detachRole']);
 Route::post('/attachDetachRoles/{user}', [UserAuthController::class, 'attachDetachRoles']);
 //Route de recuperation des utilisateurs avec leurs roles
 Route::get('/getUsersWithRoles', [UserAuthController::class, 'getUsersWithRoles']);
+//Route pour afficher tous les agents
+
 
 
 // Route pour les roles
 Route::resource('roles', RoleController::class)->middleware('auth.token');
+Route::get('roleByName/{name}', [RoleController::class, 'getRoleByName'])->middleware('auth.token');
+//Route pour afficher les utilisateurs d'un role
+Route::get('/roles_/getUsersByRole/{role}', [RoleController::class, 'getUsersByRole']);
 //Routes pour les departements
 Route::resource('departements', DepartementController::class);
 Route::get('departements_/getDepartementsWithServices', [DepartementController::class, 'getDepartementsWithServices']);
@@ -47,4 +52,11 @@ Route::resource('services', ServiceController::class);
 Route::resource('typeIncidents', TypeIncidentController::class);
 //Route pour les incidents
 Route::resource('incidents', IncidentController::class)->middleware('auth.token');
-
+//Route pour l'affectation d'un incident a un agent
+Route::put('incidents_/{incident}/affectInciUser/{user}', [IncidentController::class, 'affectInciUser']);
+//Route pour l'ajout du commentaire d'un incident
+Route::put('incidents_/addComment/{incident}', [IncidentController::class, 'addComment']);
+//Route pour la modification de la priorite
+Route::put('/incidents/priorite/{incident}', [IncidentController::class, 'updatePriorite']);
+//Route pour la modification du statut
+Route::put('/incidents/statut/{incident}', [IncidentController::class, 'updateStatut']);

@@ -33,11 +33,9 @@ class Authentification
             try{
                 Auth::setUser(User::findOrFail($userId));
             }catch(e){
-                dd("Cas2");
                 return response()->json(["error" => "Non autorise"], 401);
             }
         }else{
-            dd("Cas3");
             return response()->json(["error" => "Non autorise"], 401);
         }
         return $next($request);

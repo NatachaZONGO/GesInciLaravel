@@ -22,7 +22,8 @@ class UserAuthController extends Controller
         }
         return response()->json( $users);
     }
-
+    
+   
     //fonction register
     public function register(Request $request){
         $registerUserData = $request->validate([

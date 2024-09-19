@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\Role;
+use App\Models\Incident;
 
 
 class User extends Authenticatable
@@ -63,6 +64,9 @@ class User extends Authenticatable
 
     }
 
-    
+    public function incidents(): BelongsToMany 
+    {
+        return $this->belongsToMany(Incident::class);
+    }
    
 }

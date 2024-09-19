@@ -21,12 +21,22 @@ class Incident extends Model
 
     public function type_incident()
     {
-        return $this->belongsTo(TypeIncident::class, 'type_incident');
+        return $this->belongsTo(TypeIncident::class, 'type_incident_id');
     }
 
     public function service()
     {
-        return $this->belongsTo(Service::class, 'service');
+        return $this->belongsTo(Service::class, 'service_id');
+    }
+
+    public function soumis_par()
+    {
+        return $this->belongsTo(User::class, 'soumis_par');
+    }
+
+    public function prise_en_charge_par()
+    {
+        return $this->belongsTo(User::class, 'prise_en_charge_par');
     }
 }
 
