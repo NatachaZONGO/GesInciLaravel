@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Role;
 use App\Http\Controllers\TypeIncidentController;
 use App\Http\Controllers\IncidentController;
+use App\Http\Controllers\StatistiqueController;
 use App\Models\Departement;
 use App\Models\Service;
 use App\Models\TypeIncident;
@@ -34,7 +35,10 @@ Route::delete('/detachRoles/{user}', [UserAuthController::class, 'detachRole']);
 Route::post('/attachDetachRoles/{user}', [UserAuthController::class, 'attachDetachRoles']);
 //Route de recuperation des utilisateurs avec leurs roles
 Route::get('/getUsersWithRoles', [UserAuthController::class, 'getUsersWithRoles']);
+//Route pour avoir les roles d un utilisateur
+Route::get('/getConnectedUserRoles', [UserAuthController::class, 'getConnectedUserRoles'])->middleware('auth.token');
 //Route pour afficher tous les agents
+Route::get('/getConnectedUser', [UserAuthController::class, 'getConnectedUser'])->middleware('auth.token');
 
 
 
@@ -60,3 +64,17 @@ Route::put('incidents_/addComment/{incident}', [IncidentController::class, 'addC
 Route::put('/incidents/priorite/{incident}', [IncidentController::class, 'updatePriorite']);
 //Route pour la modification du statut
 Route::put('/incidents/statut/{incident}', [IncidentController::class, 'updateStatut']);
+//Route pour afficher la liste des incidents q'un utilisateur a soumis
+Route::get('/incidents_/getIncidentsByUser/{user}', [IncidentController::class, 'getIncidentsByUser']);
+//Route pour afficher la liste des incidents q'un utilisateur a pris en charge
+Route::get('/incidents_/getIncidentsByUserCharge/{user}', [IncidentController::class, 'getIncidentsByUserCharge']);
+//Route pour afficher la liste des incidents qui ont ete affectés a un agent
+Route::get('/incidents_/getIncidentsByUserAffect/{user}', [IncidentController::class, 'getIncidentsByUserAffect']);
+
+/////////////////////////////////////////Statistiques Routes/////////////////////////////////////////////////
+Route::get('/statistiques/incidents-par-agent', [StatistiqueController::class, 'incidentsParAgent']);
+Route::get('/statistiques/incidents-par-service', [StatistiqueController::class, 'incidentsParService']);
+Route::get('/statistiques/duree-moyenne-resolution', [StatistiqueController::class, 'dureeMoyenneResolution']);
+Route::get('/statistiques/incidents-par-agent/{agent_id}', [StatistiqueController::class, 'incidentsParAgent']);
+Route::get('/statistiques/incidents-par-service/{serviceId}', [StatistiqueController::class, 'incidentsParService']);
+Route::get('/statistiques/duree-resolution/{incident}', [StatistiqueController::class, 'dureeMoyenneResolution']);

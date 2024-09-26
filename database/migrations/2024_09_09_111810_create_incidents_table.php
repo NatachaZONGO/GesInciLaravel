@@ -23,11 +23,11 @@ return new class extends Migration
             $table->foreignIdFor(Service::class);
             $table->unsignedBigInteger('soumis_par');
             $table->foreign('soumis_par')->references('id')->on('users');
-            $table->date('date_soumission');
+            $table->dateTime('date_soumission');
             $table->unsignedBigInteger('prise_en_charge_par')->nullable();
             $table->foreign('prise_en_charge_par')->references('id')->on('users');
-            $table->date('date_prise_en_charge')->nullable();
-            $table->enum('statut', ['en_cours', 'traite', 'annule']);
+            $table->dateTime('date_prise_en_charge')->nullable();
+            $table->enum('statut', ['cree', 'en_cours', 'traite']);
             $table->timestamps();
         });
     }

@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Incident extends Model
 {
-
+    public static String $CREE = 'cree'; 
     public static String $EN_COURS = 'en_cours'; 
     public static String $TRAITE = 'traite';
-    public static String $ANNULER = 'annule';  
+     
 
     public static String $FAIBLE ='faible';
     public static String $MOYENNE ='moyenne';

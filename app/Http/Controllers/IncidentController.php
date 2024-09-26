@@ -13,16 +13,43 @@ class IncidentController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
+{
+    // Utilisateur authentifié
+    $user = auth()->user();
+    // Récupérer les rôles de l'utilisateur connecté
+    $roles = $user->roles()->pluck('nom')->toArray(); // Supposons que le nom du rôle est dans la colonne 'name'
+
+    // Vérifier si l'utilisateur est un administrateur
+    if (in_array('Administrateur', $roles)) {
+        // Si c'est un admin, retourner tous les incidents
         $incidents = Incident::with(['type_incident', 'service', 'soumis_par', 'prise_en_charge_par'])->get();
-        if ($incidents->isEmpty()) {
-            return response()->json([
-                'message' => 'La liste des incidents est vide',
-            ]);
-        }
-    
-        return response()->json($incidents);
+    } elseif (in_array('Agent spécial', $roles) || in_array('Agent', $roles)) {
+        // Si l'utilisateur est un agent spécial ou un agent, retourner ses propres incidents soumis et affectés
+        $incidents = Incident::with(['type_incident', 'service', 'soumis_par', 'prise_en_charge_par'])
+            ->where('soumis_par', $user->id) // Incidents soumis par l'agent
+            ->orWhere('prise_en_charge_par', $user->id) // Incidents affectés à l'agent
+            ->orWhere(function ($query) use ($user) {
+                $query->where('prise_en_charge_par', $user->id)
+                      ->where('statut', Incident::$TRAITE); // Incidents résolus par l'agent
+            })
+            ->get();
+    } else {
+        // Pour les autres utilisateurs, retourner uniquement les incidents soumis par eux
+        $incidents = Incident::with(['type_incident', 'service', 'prise_en_charge_par'])
+            ->where('soumis_par', $user->id) // Incidents soumis par l'utilisateur
+            ->get();
     }
+
+    // Vérification si la liste des incidents est vide
+    if ($incidents->isEmpty()) {
+        return response()->json([
+            'message' => 'La liste des incidents est vide',
+        ]);
+    }
+
+    return response()->json($incidents);
+}
+
 
     /**
      * Show the form for creating a new resource.
@@ -47,19 +74,23 @@ class IncidentController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
+        // Utilisateur authentifié
+        $user = auth()->user();
+
+        // Créer l'incident en utilisant l'utilisateur connecté
         $incident = Incident::create([
-            'nom' => $request->nom,
-            'description' => $request->description,
-            'type_incident_id' => $request->type_incident_id,
-            'priorite' => Incident::$MOYENNE,
-            'service_id' => $request->service_id,
-            'soumis_par' => auth()->user()->id,
-            'date_soumission' => date('Y-m-d'),
-            'prise_en_charge_par' => null,
-            'date_prise_en_charge' => null,
-            'statut' => Incident::$EN_COURS,
-            'commentaire' => null,
-        ]);
+        'nom' => $request->nom,
+        'description' => $request->description,
+        'type_incident_id' => $request->type_incident_id,
+        'priorite' => Incident::$MOYENNE,
+        'service_id' => $request->service_id,
+        'soumis_par' => $user->id, // Utilisateur connecté
+        'date_soumission' => now(),
+        'prise_en_charge_par' => null,
+        'date_prise_en_charge' => null,
+        'statut' => Incident::$CREE,
+        'commentaire' => null,
+    ]);
         return response()->json($incident);
     }
 
@@ -113,9 +144,9 @@ class IncidentController extends Controller
             'priorite' => 'in:faible,moyenne,forte',
             'service_id' => 'exists:services,id',
             'soumis_par' => 'exists:users,id',
-            'date_soumission' => 'date',
+            'date_soumission' => 'dateTime',
             'prise_en_charge_par' => 'exists:users,id',
-            'date_prise_en_charge' => 'date',
+            'date_prise_en_charge' => 'dateTime',
             'statut' => 'in:en_cours,traite,annule',
             'commentaires' => 'nullable|string',
         ]);
@@ -133,7 +164,7 @@ class IncidentController extends Controller
             //'date_soumission' => $request->date_soumission,
             //'prise_en_charge_par' => $request->prise_en_charge_par,
             //'date_prise_en_charge' => $request->date_prise_en_charge,
-            //'statut' => $request->statut,
+            'statut' => $request->statut,
             //'commentaires' => $request->commentaires,
         ]);
         return response()->json($incident);
@@ -165,6 +196,8 @@ class IncidentController extends Controller
 
     // Affecter l'incident à l'utilisateur (champ 'prise_en_charge_par')
     $incident->prise_en_charge_par = $user->id;
+    // Mise à jour du statut en "traité"
+    $incident->statut = Incident::$EN_COURS;
     $incident->save();
 
     return response()->json(['message' => 'Incident affecté avec succès à l\'utilisateur'], 200);
@@ -184,6 +217,9 @@ class IncidentController extends Controller
             return response()->json(['message' => 'Incident non trouve'], 404);
         }
         $incident->commentaires = $request->commentaires;
+        // Mise à jour du statut en "traité"
+        $incident->statut = Incident::$TRAITE;
+        $incident->date_prise_en_charge = now();
         $incident->save();
         return response()->json($incident);
     }
@@ -230,5 +266,32 @@ class IncidentController extends Controller
         ], 200);
     }
       
+// fonction pour afficher la liste des incidents q'un utilisateur a soumis
+    public function getIncidentsByUser($userId)
+    {
+        // Utilisateur authentifié
+        $user = auth()->user();
+        // Vérifier le rôle de l'utilisateur
+        if ($user->role === 'Administrateur') {
+            // Si c'est un admin, retourner tous les incidents
+            $incidents = Incident::with(['type_incident', 'service', 'soumis_par', 'prise_en_charge_par'])->get();
+        } else {
+            // Sinon, retourner uniquement les incidents soumis par l'utilisateur
+            $incidents = Incident::where('soumis_par', $user->id)->with(['type_incident', 'service', 'prise_en_charge_par'])->get();
+        }
+    }    
 
+    // fonction pour afficher la liste des incidents q'un utilisateur a pris en charge
+    public function getIncidentsByUserCharge($userId)
+    {
+        $incidents = Incident::where('prise_en_charge_par', $userId)->get();
+        return response()->json($incidents);
+    }
+
+    // fonction pour afficher la liste des incidents qui ont ete affectés a un agent
+    public function getIncidentsByUserAffect($userId)
+    {
+        $incidents = Incident::where('affecte_par', $userId)->get();
+        return response()->json($incidents);
+    }
 }

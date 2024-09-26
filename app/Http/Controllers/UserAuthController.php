@@ -68,23 +68,39 @@ class UserAuthController extends Controller
         ]);
     }
 
-    // fonction de connexion login
-    public function login(Request $request){
-        $loginUserData = $request->validate([
-            'email'=>'required|string|email',
-            'password'=>'required|'/*min:8*/
-        ]);
-        $user = User::where('email',$loginUserData['email'])->first();
-        if(!$user || !Hash::check($loginUserData['password'],$user->password)){
-            return response()->json([
-                'message' => 'Invalid Credentials'
-            ],401);
-        }
-        $token = $user->createToken($user->nom.'-AuthToken', $user->abilities() )->plainTextToken;
+    
+// Fonction de connexion login
+public function login(Request $request){
+    // Validation des données d'entrée
+    $loginUserData = $request->validate([
+        'email' => 'required|string|email',
+        'password' => 'required|string|min:8', // Correction: ajout du type string et de la validation min:8
+    ]);
+
+    // Recherche de l'utilisateur par email
+    $user = User::where('email', $loginUserData['email'])->first();
+
+    // Vérification des identifiants
+    if (!$user || !Hash::check($loginUserData['password'], $user->password)) {
         return response()->json([
-            'access_token' => $token, 
-        ]);
+            'message' => 'Identifiants incorrects'
+        ], 401); // Retourne une erreur 401 en cas d'échec
     }
+
+    // Création du token d'authentification pour l'utilisateur
+    $token = $user->createToken($user->nom.'-AuthToken')->plainTextToken;
+
+    // Récupération des rôles de l'utilisateur via la relation 'roles'
+    $roles = $user->roles()->get();
+
+    // Envoi de la réponse avec le token, les infos utilisateur et les rôles
+    return response()->json([
+        'access_token' => $token, 
+        'user' => $user, 
+        'roles' => $roles,
+    ]);
+}
+
 
     // fonction de connexion logout
     public function logout(){
@@ -118,6 +134,12 @@ class UserAuthController extends Controller
             return response()->json($users);
         }
 
+        public function getConnectedUserRoles(){
+            return response()->json(
+                auth()->user()->roles()->get()
+            );
+        }
+
         //fonction pour ajouter et supprimer un tableau de plusieurs roles à un utilisateur
         public function attachDetachRoles(User $user, request $request){
             if ($request->has('roles')) {
@@ -130,5 +152,11 @@ class UserAuthController extends Controller
                 return response()->json([],400);
             }
         }
-
+        // fonction pour recuperer les donnees de l'utilisateur connecté en  ayant son token
+        public function getConnectedUser(){
+            return response()->json(auth()->user());
+        }
+        
+        
+        
 }
