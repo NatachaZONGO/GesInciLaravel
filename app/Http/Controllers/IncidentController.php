@@ -19,20 +19,21 @@ class IncidentController extends Controller
     // Récupérer les rôles de l'utilisateur connecté
     $roles = $user->roles()->pluck('nom')->toArray(); // Supposons que le nom du rôle est dans la colonne 'name'
 
-    // Vérifier si l'utilisateur est un administrateur
-    if (in_array('Administrateur', $roles)) {
-        // Si c'est un admin, retourner tous les incidents
-        $incidents = Incident::with(['type_incident', 'service', 'soumis_par', 'prise_en_charge_par'])->get();
-    } elseif (in_array('Agent spécial', $roles) || in_array('Agent', $roles)) {
-        // Si l'utilisateur est un agent spécial ou un agent, retourner ses propres incidents soumis et affectés
-        $incidents = Incident::with(['type_incident', 'service', 'soumis_par', 'prise_en_charge_par'])
-            ->where('soumis_par', $user->id) // Incidents soumis par l'agent
-            ->orWhere('prise_en_charge_par', $user->id) // Incidents affectés à l'agent
-            ->orWhere(function ($query) use ($user) {
-                $query->where('prise_en_charge_par', $user->id)
-                      ->where('statut', Incident::$TRAITE); // Incidents résolus par l'agent
-            })
-            ->get();
+    // Vérifier si l'utilisateur est un administrateur ou un agent spécial
+if (in_array('Administrateur', $roles) || in_array('Agent special', $roles)) {
+    // Si c'est un administrateur ou un agent spécial, retourner tous les incidents
+    $incidents = Incident::with(['type_incident', 'service', 'soumis_par', 'prise_en_charge_par'])->get();
+} elseif (in_array('Agent', $roles)) {
+    // Si l'utilisateur est un agent, retourner ses propres incidents soumis et affectés
+    $incidents = Incident::with(['type_incident', 'service', 'soumis_par', 'prise_en_charge_par'])
+        ->where('soumis_par', $user->id) // Incidents soumis par l'agent
+        ->orWhere('prise_en_charge_par', $user->id) // Incidents affectés à l'agent
+        ->orWhere(function ($query) use ($user) {
+            $query->where('prise_en_charge_par', $user->id)
+                  ->where('statut', Incident::$TRAITE); // Incidents résolus par l'agent
+        })
+        ->get();
+
     } else {
         // Pour les autres utilisateurs, retourner uniquement les incidents soumis par eux
         $incidents = Incident::with(['type_incident', 'service', 'prise_en_charge_par'])

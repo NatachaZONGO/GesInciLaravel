@@ -157,6 +157,12 @@ public function login(Request $request){
             return response()->json(auth()->user());
         }
         
-        
+        //Methode pour recuperer toutes les informations de l'utilisateur connecte ainsi que ses roles
+        public function getConnectedUserInfos(){
+            return response()->json([
+                'user' => auth()->user(),
+                'roles' => auth()->user()->roles()->get()
+            ]);
+        }
         
 }

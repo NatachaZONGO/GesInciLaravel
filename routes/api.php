@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Role;
 use App\Http\Controllers\TypeIncidentController;
 use App\Http\Controllers\IncidentController;
+use App\Http\Controllers\MesIncidentController;
 use App\Http\Controllers\StatistiqueController;
 use App\Models\Departement;
 use App\Models\Service;
@@ -39,7 +40,8 @@ Route::get('/getUsersWithRoles', [UserAuthController::class, 'getUsersWithRoles'
 Route::get('/getConnectedUserRoles', [UserAuthController::class, 'getConnectedUserRoles'])->middleware('auth.token');
 //Route pour afficher tous les agents
 Route::get('/getConnectedUser', [UserAuthController::class, 'getConnectedUser'])->middleware('auth.token');
-
+//Route pour afficher toutes les informations de l'utilisateur connecte
+Route::get('/getConnectedUserInfos', [UserAuthController::class, 'getConnectedUserInfos'])->middleware('auth.token');
 
 
 // Route pour les roles
@@ -70,6 +72,11 @@ Route::get('/incidents_/getIncidentsByUser/{user}', [IncidentController::class, 
 Route::get('/incidents_/getIncidentsByUserCharge/{user}', [IncidentController::class, 'getIncidentsByUserCharge']);
 //Route pour afficher la liste des incidents qui ont ete affectés a un agent
 Route::get('/incidents_/getIncidentsByUserAffect/{user}', [IncidentController::class, 'getIncidentsByUserAffect']);
+
+
+Route::get('/mesincidents', [MesIncidentController::class, 'index'])->middleware('auth.token');
+Route::get('mesincidents/{incident}', [IncidentController::class, 'show'])->middleware('auth.token');
+
 
 /////////////////////////////////////////Statistiques Routes/////////////////////////////////////////////////
 Route::get('/statistiques/incidents-par-agent', [StatistiqueController::class, 'incidentsParAgent']);
