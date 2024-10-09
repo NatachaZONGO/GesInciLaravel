@@ -23,12 +23,12 @@ Route::get('/user', function (Request $request) {
 });
 
 //Routes
-Route::get('users', [UserAuthController::class, 'index']);
+Route::get('users', [UserAuthController::class, 'index'])->middleware('auth.token');;
 Route::post('register', [UserAuthController::class, 'register']);
-Route::delete('deleteUser/{user}', [UserAuthController::class, 'delete']);
-Route::put('updateUser/{user}', [UserAuthController::class, 'update']);
+Route::delete('deleteUser/{user}', [UserAuthController::class, 'delete'])->middleware('auth.token');;
+Route::put('updateUser/{user}', [UserAuthController::class, 'update'])->middleware('auth.token');;
 Route::post('login', [UserAuthController::class, 'login']);
-Route::delete('logout', [UserAuthController::class, 'logout']);
+Route::delete('logout', [UserAuthController::class, 'logout'])->middleware('auth.token');;
 //Route de attachRole
 Route::post('attachRoles/{user}', [UserAuthController::class, 'attachRole']);
 //Route de detachRole
@@ -45,25 +45,25 @@ Route::get('/getConnectedUserInfos', [UserAuthController::class, 'getConnectedUs
 
 
 // Route pour les roles
-Route::resource('roles', RoleController::class)->middleware('auth.token');
+Route::resource('roles', RoleController::class)->middleware('auth.token')->middleware('auth.token');;
 Route::get('roleByName/{name}', [RoleController::class, 'getRoleByName'])->middleware('auth.token');
 //Route pour afficher les utilisateurs d'un role
 Route::get('/roles_/getUsersByRole/{role}', [RoleController::class, 'getUsersByRole']);
 //Routes pour les departements
-Route::resource('departements', DepartementController::class);
+Route::resource('departements', DepartementController::class)->middleware('auth.token');;
 Route::get('departements_/getDepartementsWithServices', [DepartementController::class, 'getDepartementsWithServices']);
 //Route pour les services
-Route::resource('services', ServiceController::class);
+Route::resource('services', ServiceController::class)->middleware('auth.token');;
 //Route pour les types d'incidents
-Route::resource('typeIncidents', TypeIncidentController::class);
+Route::resource('typeIncidents', TypeIncidentController::class)->middleware('auth.token');;
 //Route pour les incidents
 Route::resource('incidents', IncidentController::class)->middleware('auth.token');
 //Route pour l'affectation d'un incident a un agent
-Route::put('incidents_/{incident}/affectInciUser/{user}', [IncidentController::class, 'affectInciUser']);
+Route::put('incidents_/{incident}/affectInciUser/{user}', [IncidentController::class, 'affectInciUser'])->middleware('auth.token');;
 //Route pour l'ajout du commentaire d'un incident
-Route::put('incidents_/addComment/{incident}', [IncidentController::class, 'addComment']);
+Route::put('incidents_/addComment/{incident}', [IncidentController::class, 'addComment'])->middleware('auth.token');;
 //Route pour la modification de la priorite
-Route::put('/incidents/priorite/{incident}', [IncidentController::class, 'updatePriorite']);
+Route::put('/incidents/priorite/{incident}', [IncidentController::class, 'updatePriorite'])->middleware('auth.token');;
 //Route pour la modification du statut
 Route::put('/incidents/statut/{incident}', [IncidentController::class, 'updateStatut']);
 //Route pour afficher la liste des incidents q'un utilisateur a soumis
