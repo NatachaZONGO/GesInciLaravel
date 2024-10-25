@@ -59,11 +59,11 @@ Route::resource('typeIncidents', TypeIncidentController::class)->middleware('aut
 //Route pour les incidents
 Route::resource('incidents', IncidentController::class)->middleware('auth.token');
 //Route pour l'affectation d'un incident a un agent
-Route::put('incidents_/{incident}/affectInciUser/{user}', [IncidentController::class, 'affectInciUser'])->middleware('auth.token');;
+Route::put('incidents_/{incident}/affectInciUser/{user}', [IncidentController::class, 'affectInciUser']);
 //Route pour l'ajout du commentaire d'un incident
-Route::put('incidents_/addComment/{incident}', [IncidentController::class, 'addComment'])->middleware('auth.token');;
+Route::put('incidents_/addComment/{incident}', [IncidentController::class, 'addComment'])->middleware('auth.token');
 //Route pour la modification de la priorite
-Route::put('/incidents/priorite/{incident}', [IncidentController::class, 'updatePriorite'])->middleware('auth.token');;
+Route::put('/incidents/priorite/{incident}', [IncidentController::class, 'updatePriorite'])->middleware('auth.token');
 //Route pour la modification du statut
 Route::put('/incidents/statut/{incident}', [IncidentController::class, 'updateStatut']);
 //Route pour afficher la liste des incidents q'un utilisateur a soumis

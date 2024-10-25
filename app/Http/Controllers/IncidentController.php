@@ -6,6 +6,7 @@ use App\Models\Incident;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use App\Notifications\SendNotiAffectationInci;
 
 class IncidentController extends Controller
 {
@@ -181,7 +182,7 @@ if (in_array('Administrateur', $roles) || in_array('Agent special', $roles)) {
     }
 
     // Fonction pour affecter la gestion d un incident a un utilisateur
-        public function affectInciUser($incidentId, $userId)
+    public function affectInciUser($incidentId, $userId)
     {
         // Récupérer l'incident
     $incident = Incident::find($incidentId);
@@ -201,8 +202,13 @@ if (in_array('Administrateur', $roles) || in_array('Agent special', $roles)) {
     $incident->statut = Incident::$EN_COURS;
     $incident->save();
 
-    return response()->json(['message' => 'Incident affecté avec succès à l\'utilisateur'], 200);
+    //envoyer un mail a l'utilisateur apres l'affectation de l'incident (si ca s'est bien éffectuée)
+    if ($incident && $user) {
+        $user->notify(new SendNotiAffectationInci($incident));
     }
+
+    return response()->json(['message' => 'Incident affecté avec succès à l\'utilisateur'], 200);
+}
     
    // fonction pour enregistrer le commentaire d'un incident dans le champ 'commentaires' de la table 'incidents'
     public function addComment($incidentId, Request $request)
